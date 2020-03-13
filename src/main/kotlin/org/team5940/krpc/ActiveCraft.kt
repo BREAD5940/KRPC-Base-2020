@@ -5,6 +5,7 @@ import krpc.client.services.SpaceCenter
 import org.ghrobotics.lib.mathematics.threedim.geometry.Translation3d
 import org.ghrobotics.lib.mathematics.units.SIUnit
 import org.ghrobotics.lib.mathematics.units.derived.Radian
+import org.ghrobotics.lib.mathematics.units.derived.degrees
 import org.ghrobotics.lib.mathematics.units.derived.inDegrees
 import org.team5940.krpc.util.PitchYawRollHelper
 import kotlin.properties.Delegates
@@ -65,15 +66,15 @@ open class ActiveCraftBase {
 
     val pitchYawRoll get() = PitchYawRollHelper.getPitchYawRoll(connection, spaceCenterInstance, wrappedVessel)
 
-    val pitch get() = srfFlight.pitch.toDouble()
-    val roll get() = srfFlight.roll.toDouble()
-    val heading get() = srfFlight.heading.toDouble()
+    val pitch get() = whackyVelocityReferenceFrame.pitch.toDouble().degrees
+    val roll get() = whackyVelocityReferenceFrame.roll.toDouble().degrees
+    val heading get() = whackyVelocityReferenceFrame.heading.toDouble().degrees
 
     /**
      * Get or set the autopilot pitch, heading, roll
      */
     val direction: Translation3d
-        get() = Translation3d(pitch, heading, roll)
+        get() = Translation3d(pitch.inDegrees(), heading.inDegrees(), roll.inDegrees())
 
     fun setSrfTargetDirection(pitch: SIUnit<Radian>, heading: SIUnit<Radian>, roll: SIUnit<Radian>) {
         autoPilot.targetRoll = roll.inDegrees().toFloat()
@@ -83,6 +84,10 @@ open class ActiveCraftBase {
     var autoPilotEngaged by Delegates.observable(false) { _, _, newValue ->
             if (newValue) wrappedControl.sas = false
             if (newValue) autoPilot.engage() else autoPilot.disengage()
+    }
+
+    fun setManualPitchYawRoll(pitchInput: Double, yawInput: Double, rollInput: Double) {
+        wrappedControl.inputMode = SpaceCenter.ControlInputMode.ADDITIVE
     }
 
     protected operator fun Translation3d.minus(other: Translation3d) = Translation3d(x - other.x, y - other.y, z - other.z)

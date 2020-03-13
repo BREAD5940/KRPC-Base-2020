@@ -1,11 +1,14 @@
 package org.team5940.krpc
 
 import edu.wpi.first.wpilibj.geometry.Translation2d
+import edu.wpi.first.wpilibj.system.LinearSystem
+import edu.wpi.first.wpiutil.math.Nat
 import org.ghrobotics.lib.mathematics.threedim.geometry.Translation3d
 import org.ghrobotics.lib.mathematics.twodim.geometry.Translation2d
 import org.ghrobotics.lib.mathematics.units.SIUnit
 import org.ghrobotics.lib.mathematics.units.derived.Radian
 import org.ghrobotics.lib.mathematics.units.derived.degrees
+import org.ghrobotics.lib.mathematics.units.derived.inDegrees
 import org.ghrobotics.lib.mathematics.units.derived.toRotation2d
 
 /**
@@ -16,10 +19,16 @@ import org.ghrobotics.lib.mathematics.units.derived.toRotation2d
 object GrasshopperController {
 
     fun pitchHeadingToXY(pitch: SIUnit<Radian>, heading: SIUnit<Radian>): Translation2d {
-        val translation = Translation2d(SIUnit((pitch - 90.degrees).value), heading.toRotation2d())
-        println(translation)
+        val translation = Translation2d(SIUnit((pitch - 90.degrees).value), (heading - 90.degrees).toRotation2d())
+        print("pitch ${pitch.inDegrees()} yaw ${heading.inDegrees()} ")
+//        println(translation)
         return translation
     }
+
+    val plant = LinearSystem(
+            Nat.N2(), Nat.N2(), Nat.N2(),
+
+    )
 
 
 }
