@@ -89,8 +89,8 @@ object PitchYawRollHelper {
             }
         }
 
-        System.out.printf("pitch = %.1f, heading = %.1f, roll = %.1f\n",
-                pitch, heading, roll)
+//        System.out.printf("pitch = %.1f, heading = %.1f, roll = %.1f\n",
+//                pitch, heading, roll)
 
         return Translation3d(pitch, heading, roll)
 

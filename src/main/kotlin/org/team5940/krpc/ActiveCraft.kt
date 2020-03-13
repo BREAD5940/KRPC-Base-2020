@@ -87,7 +87,10 @@ open class ActiveCraftBase {
     }
 
     fun setManualPitchYawRoll(pitchInput: Double, yawInput: Double, rollInput: Double) {
-        wrappedControl.inputMode = SpaceCenter.ControlInputMode.ADDITIVE
+        autoPilotEngaged = false
+        wrappedControl.pitch = pitchInput.toFloat()
+        wrappedControl.yaw = yawInput.toFloat()
+        wrappedControl.roll = rollInput.toFloat()
     }
 
     protected operator fun Translation3d.minus(other: Translation3d) = Translation3d(x - other.x, y - other.y, z - other.z)
