@@ -32,3 +32,4 @@ bin/*
 imgui.ini
 log/*
 *.kotlin_module
+*.hprof
