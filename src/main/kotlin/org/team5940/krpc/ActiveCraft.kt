@@ -20,7 +20,9 @@ open class ActiveCraftBase {
     val wrappedControl: SpaceCenter.Control = wrappedVessel.control
     private val autoPilot = wrappedVessel.autoPilot
 
-    val srfFlight: SpaceCenter.Flight = wrappedVessel.flight(wrappedVessel.orbit.body.referenceFrame)
+    val orbitFlight: SpaceCenter.Flight = wrappedVessel.flight(wrappedVessel.orbit.body.referenceFrame)
+    val surfaceFlight = wrappedVessel.flight(wrappedVessel.surfaceReferenceFrame)
+    val surfaceReferenceFrame get() = wrappedVessel.surfaceReferenceFrame
 
     val twr: Double get() = (wrappedVessel.maxThrust / wrappedVessel.mass / 9.80655)
 
@@ -28,12 +30,17 @@ open class ActiveCraftBase {
 
     val mass = wrappedVessel.mass.toDouble() // kg
 
+    val currentBody get() = wrappedVessel.orbit.body
+    val currentSrfGravity get() = currentBody.surfaceGravity.toDouble()
+    val drag get() = surfaceFlight.drag
+    val missionElapsedTime get() = wrappedVessel.met
+
     val globalLatLng: Pair<Double, Double>
-        get() = (srfFlight.latitude to srfFlight.longitude)
+        get() = (orbitFlight.latitude to orbitFlight.longitude)
 
-    val surfaceAltitude get() = srfFlight.surfaceAltitude
+    val surfaceAltitude get() = orbitFlight.surfaceAltitude
 
-    val verticalVelcoity get() = srfFlight.verticalSpeed
+    val verticalVelcoity get() = orbitFlight.verticalSpeed
 
 //    /**
 //     * @return the location relative to the homeLocation

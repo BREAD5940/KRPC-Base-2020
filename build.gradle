@@ -83,7 +83,7 @@ dependencies {
     nativeDesktopZip wpi.deps.vendor.jni(wpi.platforms.desktop)
 
     compile group: 'org.javatuples', name: 'javatuples', version: '1.2'
-    implementation 'com.google.protobuf:protobuf-java:3.11.4'
+    implementation 'com.google.protobuf:protobuf-java:3.8.0'
 //    compile files('libs/krpc-java-0.4.9-158-g5daf55f8.jar')
     compile fileTree(dir: 'libs', include: ['*.jar'])
 

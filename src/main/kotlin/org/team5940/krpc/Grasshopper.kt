@@ -1,18 +1,21 @@
 package org.team5940.krpc
 
-import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj.geometry.Translation2d
+import edu.wpi.first.wpilibj.controller.ProfiledPIDController
+import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile
+import krpc.client.services.Drawing
 import org.ghrobotics.lib.mathematics.units.SIUnit
 import org.ghrobotics.lib.mathematics.units.Second
 import org.ghrobotics.lib.mathematics.units.derived.degrees
-import org.ghrobotics.lib.mathematics.units.derived.inRadians
 import org.ghrobotics.lib.mathematics.units.inMilliseconds
 import org.ghrobotics.lib.mathematics.units.seconds
+import org.javatuples.Triplet
+import kotlin.math.roundToInt
+
 
 object Grasshopper : ActiveCraftBase() {
 
     fun start() {
-        stateSpace()
+        leap()
     }
 
     fun exampleHop() {
@@ -31,43 +34,31 @@ object Grasshopper : ActiveCraftBase() {
         throttle = 0.0
     }
 
-    fun stateSpace() {
+    fun leap() {
+        // first boink
+        val verticalController = ProfiledPIDController(1.0, 0.0, 0.0,
+                TrapezoidProfile.Constraints(1.0, 2.0))
 
-        rcs = true
-        wrappedControl.sas = false
+        verticalController.reset(surfaceAltitude)
+
         autoPilotEngaged = false
-        setGear(true)
-        GrasshopperController.reset()
-        GrasshopperController.enable()
 
-        val start = Timer.getFPGATimestamp()
-        
+        val drawing = Drawing.newInstance(connection)
 
-        println("x, y, xHat, yHat, u_0, u_1")
-        while (Timer.getFPGATimestamp() < start + 30.0) {
-            // NORTH MUST BE UP
-            val xy = GrasshopperController.pitchHeadingToXY(pitch, heading)
+        val start = missionElapsedTime
+        while (start + 60 > missionElapsedTime) {
+            val out = verticalController.calculate(surfaceAltitude, 100.0)
+            print("alt ${surfaceAltitude.roundToInt()} setpoint 100 command $out | ")
+//            throttle = out
+//            setSrfTargetDirection(90.degrees, 0.degrees, 0.degrees)
 
-            println("${xy.x}, ${xy.y}, ${GrasshopperController.loop.getXHat(0)}, ${GrasshopperController.loop.getXHat(1)}, ${GrasshopperController.loop.getU(0)}, ${GrasshopperController.loop.getU(1)}")
+//            drawing.clear(false)
+            drawing.addLine(Triplet(0.0, 0.0, 0.0), Triplet(1.0, 0.0, 0.0), surfaceReferenceFrame, true)
 
-            GrasshopperController.update(xy, Translation2d(0.0, 0.0))
-            val u = GrasshopperController.loop.u
-            setManualPitchYawRoll(
-                    u[1, 0],
-//                    0.0,
-                    u[0, 0],
-
-//                    0.0, 0.0,
-                    0.0
-//                    (0.0 - roll.inRadians()) * 2.0
-            )
-
-//            println(u.storage)
-
+            println("drag ${drag.let { "x ${it.value0} y ${it.value1} z ${it.value2}" }}") // x is north, +y is south?
             sleep(1.0.seconds / 30.0)
         }
     }
-
 
     fun sleep(time: SIUnit<Second>) = Thread.sleep(time.inMilliseconds().toLong())
 
