@@ -21,18 +21,21 @@ open class ActiveCraftBase {
     private val autoPilot = wrappedVessel.autoPilot
 
     val orbitFlight: SpaceCenter.Flight = wrappedVessel.flight(wrappedVessel.orbit.body.referenceFrame)
-    val surfaceFlight = wrappedVessel.flight(wrappedVessel.surfaceReferenceFrame)
-    val surfaceReferenceFrame get() = wrappedVessel.surfaceReferenceFrame
+    val surfaceFlight: SpaceCenter.Flight = wrappedVessel.flight(wrappedVessel.surfaceReferenceFrame)
+    val surfaceReferenceFrame: SpaceCenter.ReferenceFrame = wrappedVessel.surfaceReferenceFrame // X is up, Y is north, Z is east
+    val vesselReferenceFrame: SpaceCenter.ReferenceFrame = wrappedVessel.referenceFrame
+    val vesselFlight: SpaceCenter.Flight = wrappedVessel.flight(vesselReferenceFrame)
 
     val twr: Double get() = (wrappedVessel.maxThrust / wrappedVessel.mass / 9.80655)
 
-    val maxThrust = wrappedVessel.maxThrust.toDouble()
+    val maxThrust get() = wrappedVessel.availableThrust
 
-    val mass = wrappedVessel.mass.toDouble() // kg
+    val mass get() = wrappedVessel.mass.toDouble() // kg
 
     val currentBody get() = wrappedVessel.orbit.body
     val currentSrfGravity get() = currentBody.surfaceGravity.toDouble()
-    val drag get() = surfaceFlight.drag
+//    val drag get() = surfaceFlight.drag
+    val craftOrientedDrag get() = vesselFlight.drag
     val missionElapsedTime get() = wrappedVessel.met
 
     val globalLatLng: Pair<Double, Double>
@@ -64,18 +67,19 @@ open class ActiveCraftBase {
             wrappedControl.throttle = value.toFloat()
         }
 
-    val whackyVelocityReferenceFrame = wrappedVessel.flight(SpaceCenter.ReferenceFrame.createHybrid(
+    val hybridSrfReferenceFrame = SpaceCenter.ReferenceFrame.createHybrid(
             connection,
-            wrappedVessel.orbit.body.referenceFrame,
-            wrappedVessel.surfaceReferenceFrame,
-            wrappedVessel.orbit.body.referenceFrame,
-            wrappedVessel.orbit.body.referenceFrame))
+            wrappedVessel.orbit.body.referenceFrame, // position
+            wrappedVessel.surfaceReferenceFrame, // rotation
+            wrappedVessel.orbit.body.referenceFrame, // velocity
+            wrappedVessel.orbit.body.referenceFrame)
+    val whackyVelocityFlight = wrappedVessel.flight(hybridSrfReferenceFrame) // angular velocity
 
     val pitchYawRoll get() = PitchYawRollHelper.getPitchYawRoll(connection, spaceCenterInstance, wrappedVessel)
 
-    val pitch get() = whackyVelocityReferenceFrame.pitch.toDouble().degrees
-    val roll get() = whackyVelocityReferenceFrame.roll.toDouble().degrees
-    val heading get() = whackyVelocityReferenceFrame.heading.toDouble().degrees
+    val pitch get() = whackyVelocityFlight.pitch.toDouble().degrees
+    val roll get() = whackyVelocityFlight.roll.toDouble().degrees
+    val heading get() = whackyVelocityFlight.heading.toDouble().degrees
 
     /**
      * Get or set the autopilot pitch, heading, roll
